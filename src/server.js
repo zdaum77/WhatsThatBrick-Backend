@@ -3,15 +3,15 @@ const mongoose = require('mongoose');
 const app = require('./app');
 
 const PORT = process.env.PORT || 4000;
-const MONGO_URI = process.env.MONGO_URI;
+const MONGO_URL = process.env.MONGO_URL;
 
-if (!MONGO_URI) {
-  console.error('Error: MONGO_URI is not defined in .env file');
+if (!MONGO_URL) {
+  console.error('Error: MONGO_URL is not defined in .env file');
   process.exit(1);
 }
 
 // Connect to MongoDB
-mongoose.connect(MONGO_URI)
+mongoose.connect(MONGO_URL)
   .then(() => {
     console.log('✅ MongoDB connected successfully');
     

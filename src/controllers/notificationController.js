@@ -1,85 +1,72 @@
-const asyncHandler = require('express-async-handler');
-const Notification = require('../models/Notification');
+const Notification = require("../models/Notification");
 
-// GET /api/notifications
-const getNotifications = asyncHandler(async (req, res) => {
-  const { page = 1, limit = 20, read } = req.query;
-  
-  const filter = { user_id: req.user._id };
-  
+// Pure logic — only handles DB operations and returns data/results
+
+async function getNotificationsLogic(query, userId) {
+  const { page = 1, limit = 20, read } = query;
+
+  const filter = { user_id: userId };
+
   if (read !== undefined) {
-    filter.read = read === 'true';
+    filter.read = read === "true";
   }
-  
+
   const skip = (Number(page) - 1) * Number(limit);
-  
+
   const [data, total, unreadCount] = await Promise.all([
     Notification.find(filter)
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(Number(limit)),
     Notification.countDocuments(filter),
-    Notification.countDocuments({ user_id: req.user._id, read: false })
+    Notification.countDocuments({ user_id: userId, read: false }),
   ]);
-  
-  res.json({ 
-    data, 
+
+  return {
+    data,
     total,
     unreadCount,
-    page: Number(page), 
+    page: Number(page),
     limit: Number(limit),
-    pages: Math.ceil(total / Number(limit))
-  });
-});
+    pages: Math.ceil(total / Number(limit)),
+  };
+}
 
-// PUT /api/notifications/:id/read
-const markAsRead = asyncHandler(async (req, res) => {
+async function markAsReadLogic(id, userId) {
   const notification = await Notification.findOne({
-    _id: req.params.id,
-    user_id: req.user._id
+    _id: id,
+    user_id: userId,
   });
-  
-  if (!notification) {
-    res.status(404);
-    throw new Error('Notification not found');
-  }
-  
+
+  if (!notification) throw new Error("Notification not found");
+
   notification.read = true;
   await notification.save();
-  
-  res.json({ message: 'Notification marked as read', notification });
-});
 
-// PUT /api/notifications/read-all
-const markAllAsRead = asyncHandler(async (req, res) => {
-  await Notification.updateMany(
-    { user_id: req.user._id, read: false },
-    { read: true }
-  );
-  
-  res.json({ message: 'All notifications marked as read' });
-});
+  return { message: "Notification marked as read", notification };
+}
 
-// DELETE /api/notifications/:id
-const deleteNotification = asyncHandler(async (req, res) => {
+async function markAllAsReadLogic(userId) {
+  await Notification.updateMany({ user_id: userId, read: false }, { read: true });
+  return { message: "All notifications marked as read" };
+}
+
+async function deleteNotificationLogic(id, userId) {
   const notification = await Notification.findOne({
-    _id: req.params.id,
-    user_id: req.user._id
+    _id: id,
+    user_id: userId,
   });
-  
-  if (!notification) {
-    res.status(404);
-    throw new Error('Notification not found');
-  }
-  
-  await notification.deleteOne();
-  
-  res.json({ message: 'Notification deleted' });
-});
 
-module.exports = { 
-  getNotifications, 
-  markAsRead, 
-  markAllAsRead,
-  deleteNotification 
+  if (!notification) throw new Error("Notification not found");
+
+  await notification.deleteOne();
+
+  return { message: "Notification deleted" };
+}
+
+module.exports = {
+  getNotificationsLogic,
+  markAsReadLogic,
+  markAllAsReadLogic,
+  deleteNotificationLogic,
 };

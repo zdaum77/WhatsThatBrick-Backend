@@ -30,7 +30,7 @@ const upload = multer({
 // Simple upload endpoint
 router.post(
   "/",
-  // authMiddleware,
+  authMiddleware,
   upload.single("image"),
   asyncHandler(async (req, res) => {
     if (!req.file) {

@@ -7,8 +7,8 @@ const authRoutes = require('./routes/authRoutes');
 const brickRoutes = require('./routes/brickRoutes');
 const requestRoutes = require('./routes/requestRoutes');
 const notificationRoutes = require('./routes/notificationRoutes');
-const userRoutes = require('./routes/userRoutes');  // ADD THIS
-const uploadRoutes = require('./routes/uploadRoutes');  // ADD THIS
+const userRoutes = require('./routes/userRoutes'); 
+const uploadRoutes = require('./routes/uploadRoutes');  
 
 
 const app = express();
@@ -24,8 +24,8 @@ app.use('/api/auth', authRoutes);
 app.use('/api/bricks', brickRoutes);
 app.use('/api/requests', requestRoutes);
 app.use('/api/notifications', notificationRoutes);
-app.use('/api/users', userRoutes);  // ADD THIS
-app.use('/api/upload', uploadRoutes);  // ADD THIS
+app.use('/api/users', userRoutes); 
+app.use('/api/upload', uploadRoutes);  
 
 // Health check
 app.get('/api/health', (req, res) => {
